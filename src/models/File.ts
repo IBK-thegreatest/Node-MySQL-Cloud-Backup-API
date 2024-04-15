@@ -25,7 +25,11 @@ const FileModel = sequelize.define("File", {
     },
     isSafe: {
         type: Sequelize.BOOLEAN,
-        defaultValue: false
+        defaultValue: true
+    },
+    folderId: {
+        type: Sequelize.STRING,
+        allowNull: false
     }
 })
 

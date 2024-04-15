@@ -11,6 +11,10 @@ const FileHistoryModel = sequelize.define("File_history", {
         type: Sequelize.STRING,
         allowNull: false
     },
+    userId: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
     action: {
         type: Sequelize.STRING,
         allowNull: false,

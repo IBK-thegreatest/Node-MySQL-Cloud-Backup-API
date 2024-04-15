@@ -34,7 +34,7 @@ app.use(cors())
 app.use("/api/v1/auth", authRoutes)
 app.use("/api/v1/users", userRoutes)
 app.use("/api/v1/folders", folderRoutes)
-app.use("/api/v1/folders", fileRoutes)
+app.use("/api/v1/files", fileRoutes)
 app.use("/api/v1/reviews", reviewRoutes)
 app.use("/api/v1/fileHistory", fileHistoryRoutes)
 app.use((err: HttpException, req: Request, res: Response, next: NextFunction) => {

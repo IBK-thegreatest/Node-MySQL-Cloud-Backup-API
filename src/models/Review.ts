@@ -17,7 +17,7 @@ const ReviewModel = sequelize.define("Review", {
     },
     isSafe: {
         type: Sequelize.BOOLEAN,
-        defaultValue: false
+        defaultValue: true
     }
 })
 
