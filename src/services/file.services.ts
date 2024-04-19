@@ -2,6 +2,8 @@ import { FileData } from "../interfaces/file.interface"
 import { RequestWithUser } from "../interfaces/auth.interface"
 import multer from "multer"
 import path from "path"
+import archiver from "archiver"
+import fs from 'fs'
 import { db } from "../config/dbConfig"
 import { HttpException } from "../exceptions/HttpException"
 
@@ -79,4 +81,40 @@ export const downloadFileService = async(userId: string, fileId: string) => {
     await db.FileHistoryModel.create(fileHistoryData)
 
     return file.filePath
+}
+
+//API FOR COMPRESSING A FILE
+export const compressFileService = async (userId: string, fileId: string) => {
+    const file = await db.FileModel.findOne({ where: { fileId: fileId }}) as unknown as FileData
+    if(!file) throw new HttpException(404, "This file does not exist")
+    
+    const outputFilePath = `compressed/${Date.now()}-${file.fileName}.zip`
+    const output = fs.createWriteStream(outputFilePath)
+    const archive = archiver('zip', {
+        zlib: { level: 9 }
+    });
+    archive.on('error', function(err) {
+        throw new HttpException(500, "Error Compressing file: " + err.message);
+    })
+    archive.pipe(output)
+    archive.append(fs.createReadStream(file.filePath), { name: file.fileName })
+    await archive.finalize();
+
+    const maxHistory: string = await db.FileHistoryModel.max('historyId');
+    let newHistoryId = (maxHistory ? parseInt(maxHistory.split('-')[1], 10) + 1 : 1);
+    let historyId = `HISTORY-${newHistoryId.toString().padStart(3, '0')}`;
+    while (await db.FileHistoryModel.findOne({ where: { historyId } })) {
+        newHistoryId++;
+        historyId = `HISTORY-${newHistoryId.toString().padStart(3, '0')}`;
+    }
+    let action = "compress"
+    const fileHistoryData = {
+        historyId: historyId,
+        fileId: fileId,
+        userId: userId,
+        action: action
+    }
+    await db.FileHistoryModel.create(fileHistoryData)
+
+    return outputFilePath
 }

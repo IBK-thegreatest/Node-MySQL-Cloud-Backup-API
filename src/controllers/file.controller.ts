@@ -1,7 +1,7 @@
 import { HttpException } from "../exceptions/HttpException"
 import { Response, NextFunction } from "express"
 import { RequestWithUser } from "../interfaces/auth.interface"
-import { createFileService, downloadFileService } from "../services/file.services"
+import { compressFileService, createFileService, downloadFileService } from "../services/file.services"
 
 //UPLOADING A FILE
 export const uploadFile = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
@@ -34,6 +34,23 @@ export const downloadFile = async (req: RequestWithUser, res: Response, next: Ne
         const fileId = req.params.fileId
         const filePath = await downloadFileService(userId, fileId)
         res.status(200).download(filePath)
+    } catch (error) {
+        next(error)
+    }
+}
+
+//COMPRESSING A FILE
+export const compressfile = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const userId = req.params.userId
+        const fileId = req.params.fileId
+        const compressedFilePath = await compressFileService(userId, fileId)
+        res.status(200).json({
+            success: true,
+            status: "OK",
+            message: "File has been successfully compressed",
+            path: compressedFilePath
+        })
     } catch (error) {
         next(error)
     }
